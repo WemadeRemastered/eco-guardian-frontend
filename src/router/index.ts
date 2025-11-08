@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LoginPage from "@/iam/interfaces/pages/login-page.component.vue";
 import RegisterPage from "@/iam/interfaces/pages/register-page.component.vue";
+import AuthCallback from "@/iam/interfaces/pages/auth-callback.component.vue";
 import MainLayoutPage from "@/shared/pages/main-layout-page.vue";
 import DashboardPage from "@/analytics/interfaces/pages/dashboard.component.vue";
 import ChoosePlanPage from "@/payment/interfaces/pages/choose-plan-page.component.vue";
@@ -16,10 +17,31 @@ import PlantInfoPageComponent from "../monitoring/interfaces/pages/plant-info-pa
 import OrderPaymentSuccededPage from "../planning/interfaces/pages/order-payment-succeded.component.vue";
 
 
+const isAuthenticated = () => {
+  const auth0User = localStorage.getItem('auth0_user');
+  if (auth0User) {
+    try {
+      const parsed = JSON.parse(auth0User);
+      return parsed.role && parsed.role !== 'GUEST';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const token = localStorage.getItem('token');
+  return !!token;
+};
+
 const routes = [
-  { path: '/', redirect: '/login' },
+  {
+    path: '/',
+    redirect: () => {
+      return isAuthenticated() ? '/home' : '/login';
+    }
+  },
   { path: "/login", component: LoginPage },
   { path: "/register", component: RegisterPage },
+  { path: "/callback", component: AuthCallback },
   { path: "/choose-plan", component: ChoosePlanPage },
   { path: "/payment-succeded", component: PaymentSuccededPage },
   { path: "/payment-order-succeded", component: OrderPaymentSuccededPage },
@@ -83,5 +105,6 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
 
 export default router;

@@ -6,7 +6,7 @@
       </figure>
       <ul class="flex flex-col gap-1">
         <!-- Home -->
-        <li class="holder" aria-label="Check your info in he main dashboard" v-if="authStore.role !== 'Specialist'" role="button" @click="$router.push('/home')" :class="[
+        <li class="holder" aria-label="Check your info in the main dashboard" v-if="authStore.role !== 'Specialist'" role="button" @click="navigateTo('/home')" :class="[
           'cursor-pointer flex items-center justify-center bg-gray-300/50 w-14 h-14 rounded-md group transition-all duration-300 ease-in-out',
           isActive('/home') ? 'bg-slate-700' : '',
         ]">
@@ -14,7 +14,7 @@
             :class="isActive('/home') ? 'text-slate-50' : 'text-gray-500 group-hover:text-slate-50'"></i>
         </li>
         <!-- Plants -->
-        <li class="holder" aria-label="Check your plants or plantation info" v-if="authStore.role !== 'Specialist'" role="button" @click="$router.push('/info-panel')" :class="[
+        <li class="holder" aria-label="Check your plants or plantation info" v-if="authStore.role !== 'Specialist'" role="button" @click="navigateTo('/info-panel')" :class="[
           'cursor-pointer flex items-center justify-center bg-gray-300/50 w-14 h-14 rounded-md group transition-all duration-300 ease-in-out',
           isActive('/info-panel') ? 'bg-slate-700' : '',
         ]">
@@ -22,7 +22,7 @@
             :class="isActive('/info-panel') ? 'text-slate-50' : 'text-gray-500 group-hover:text-slate-50'"></i>
         </li>
         <!-- Consulting (Chat) -->
-        <li aria-label="ask your questions in consulting" class="holder" role="button" @click="$router.push('/consulting')" :class="[
+        <li aria-label="ask your questions in consulting" class="holder" role="button" @click="navigateTo('/consulting')" :class="[
           'cursor-pointer flex items-center justify-center bg-gray-300/50 w-14 h-14 rounded-md group transition-all duration-300 ease-in-out',
           isActive('/consulting') ? 'bg-slate-700' : '',
         ]">
@@ -30,7 +30,7 @@
             :class="isActive('/consulting') ? 'text-slate-50' : 'text-gray-500 group-hover:text-slate-50'"></i>
         </li>
         <!-- Profile (Person) -->
-        <li class="holder" aria-label="See your profile" role="button" @click="$router.push('/profile')" :class="[
+        <li class="holder" aria-label="See your profile" role="button" @click="navigateTo('/profile')" :class="[
           'cursor-pointer flex items-center justify-center bg-gray-300/50 w-14 h-14 rounded-md group transition-all duration-300 ease-in-out',
           isActive('/profile') ? 'bg-slate-700' : '',
         ]">
@@ -38,7 +38,7 @@
             :class="isActive('/profile') ? 'text-slate-50' : 'text-gray-500 group-hover:text-slate-50'"></i>
         </li>
       </ul>
-      <button aria-label="Logout"  class='logout holder cursor-pointer flex items-center justify-center w-12 h-12 bg-slate-700 rounded-md group transition-all duration-300 ease-in-out' @click="authStore.logout()">
+      <button aria-label="Logout"  class='logout holder cursor-pointer flex items-center justify-center w-12 h-12 bg-slate-700 rounded-md group transition-all duration-300 ease-in-out' @click="handleLogout">
             <i class="pi pi-sign-out text-slate-50"></i>
       </button>
     </div>
@@ -46,14 +46,29 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../../iam/interfaces/store/auth-store';
-import { useRoute } from 'vue-router';
-
+import { useAuth0 } from '@auth0/auth0-vue';
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
+const { logout, isLoading } = useAuth0();
 
 function isActive(path: string) {
   return route.path === path;
+}
+
+function navigateTo(path: string) {
+  router.push(path);
+}
+
+const handleLogout = () => {
+  authStore.logout();
+  logout({
+    logoutParams: {
+      returnTo: window.location.origin
+    }
+  });
 }
 </script>
 
