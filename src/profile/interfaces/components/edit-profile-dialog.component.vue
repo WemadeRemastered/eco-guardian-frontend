@@ -1,7 +1,7 @@
 <template>
   <Dialog :visible="visible" @update:visible="val => emit('update:visible', val)" modal :header="t('editProfile')"
     :style="{ width: '420px', maxWidth: '95vw', padding: 0 }" @hide="onClose" class="custom-profile-dialog">
-    <form @submit.prevent="onSubmit" class="flex flex-col gap-5 p-6">
+    <div class="flex flex-col gap-5 p-6">
       <div class="flex flex-col items-center gap-2">
         <div class="relative group">
           <img :src="avatarPreview || '/placeholder-avatar.jpg'" alt="Avatar Preview"
@@ -17,28 +17,28 @@
       <div class="flex flex-col gap-3">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('name') }}</label>
-          <InputText v-model="form.name" class="w-full" required />
+          <InputText v-model="form.name" class="w-full"/>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('lastName') }}</label>
-          <InputText v-model="form.lastName" class="w-full" required />
+          <InputText v-model="form.lastName" class="w-full" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('address') }}</label>
-          <InputText v-model="form.address" class="w-full" required />
+          <InputText v-model="form.address" class="w-full" />
         </div>
       </div>
       <div v-if="errorMessage" class="text-red-600 text-sm mb-2 text-center">{{ errorMessage }}</div>
       <div class="flex justify-end gap-2 mt-4">
         <Button :label="t('cancel')" type="button" severity="secondary" @click="onClose" outlined />
-        <Button :label="t('save')" type="submit" :loading="loading" />
+        <Button :label="t('save')" type="button" :loading="loading" @click="onSubmit" />
       </div>
-    </form>
+    </div>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue';
+import {ref, watch, defineProps, defineEmits, reactive} from 'vue';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
@@ -53,16 +53,17 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:visible', 'updated']);
 
-const form = ref({
+const form = reactive({
   name: '',
   lastName: '',
   address: '',
-  avatarUrl: ''
+  avatarUrl: null
 });
 const loading = ref(false);
 const avatarFile = ref<File|null>(null);
 const avatarPreview = ref<string|null>(null);
 const errorMessage = ref('');
+const store = ProfileStore();
 
 function onClose() {
   emit('update:visible', false);
@@ -85,10 +86,10 @@ function onFileChange(event: Event) {
 
 watch(() => props.profile, (val) => {
   if (val) {
-    form.value.name = val.name || '';
-    form.value.lastName = val.lastName || '';
-    form.value.address = val.address || '';
-    form.value.avatarUrl = val.avatarUrl || '';
+    form.name = val.name || '';
+    form.lastName = val.lastName || '';
+    form.address = val.address || '';
+    form.avatarUrl = val.avatarUrl || '';
     avatarPreview.value = val.avatarUrl || null;
     avatarFile.value = null;
   }
@@ -98,13 +99,11 @@ async function onSubmit() {
   loading.value = true;
   errorMessage.value = '';
   try {
-    const store = ProfileStore();
-    // Send a plain object, not FormData
     await store.updateProfile(props.profile?.id, {
-      Name: form.value.name,
-      LastName: form.value.lastName,
-      Address: form.value.address,
-      AvatarUrl: avatarFile.value || ''
+      Name: form.name,
+      LastName: form.lastName,
+      Address: form.address,
+      AvatarUrl:  avatarFile.value ? avatarFile.value : null
     });
     emit('updated');
     emit('update:visible', false);

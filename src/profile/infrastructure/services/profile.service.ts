@@ -1,24 +1,16 @@
 import {HttpService} from "../../../shared/services/http-common.ts";
 export class ProfileService extends HttpService{
 
-    async createProfile(request: any){
-        console.log('Original request:', request);
-        return await this.http.post("/profiles", request);
-
-    }
-
     async updateProfile(id: number, request: any) {
-        console.log('Form request:', request);
         return await this.http.put(`/profiles/${id}`, request,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data' //El http service sobre escribe asi q mejor usarlo asi
+                    'Content-Type': 'multipart/form-data'
                 }
             });
     }
 
     async getProfileByEmail(email: string) {
-        // Use query param instead of path param for email
         return await this.http.get(`/profiles`, { params: { email } });
     }
 }

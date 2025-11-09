@@ -11,31 +11,17 @@ export const ProfileStore = defineStore("profile",{
     actions: {
 
         async updateProfile(id: number, data: any) {
-            // Always build FormData here
-            const formData = new FormData();
-            formData.append("Name", data.Name);
-            formData.append("LastName", data.LastName);
-            formData.append("Address", data.Address);
-            if (data.AvatarUrl) {
-                formData.append("AvatarUrl", data.AvatarUrl);
-            } else {
-                formData.append("AvatarUrl", "");
-            }
             try {
-                return await profileService.updateProfile(id, formData);
+                const formData = new FormData();
+                formData.append("Name", data.Name);
+                formData.append("LastName", data.LastName);
+                formData.append("Address", data.Address);
+                if (data.AvatarUrl) {
+                    formData.append("AvatarUrl", data.AvatarUrl);
+                }
+                await profileService.updateProfile(id, formData);
             } catch (error) {
                 console.error("Error updating profile:", error);
-                throw error;
-            }
-        },
-
-        async createProfile(data: any) {
-            const request = ProfileAssembler.toRequest(data);
-            console.log("Data from the assembler:", data);
-            try {
-                return await profileService.createProfile(request);
-            } catch (error) {
-                console.error("Error creating profile:", error);
                 throw error;
             }
         },
