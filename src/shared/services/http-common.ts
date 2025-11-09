@@ -5,7 +5,7 @@ export class HttpService {
 
     constructor() {
         this.http = axios.create({
-            baseURL: "https://ecoguardian-cgenhdd6dadrgbfz.brazilsouth-01.azurewebsites.net/api/v1",
+            baseURL: "http://localhost:9080/api/v1",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "*/*",
@@ -13,9 +13,17 @@ export class HttpService {
         });
         this.http.interceptors.request.use(
             (config) => {
-                const token = localStorage.getItem("token");
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
+                const auth0Data = localStorage.getItem("@@auth0spajs@@::KoXJKt39hQKpCInZVzyNyLhRVzD5meJh::@@user@@")
+                if (auth0Data){
+                    try{
+                        const parsedData = JSON.parse(auth0Data);
+                        const token = parsedData.id_token;
+                        if (token) {
+                            config.headers.Authorization = `Bearer ${token}`;
+                        }
+                    } catch (error) {
+                        console.error("Error parsing Auth0 data:", error);
+                    }
                 }
                 return config;
             },

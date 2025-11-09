@@ -38,26 +38,19 @@ onMounted(async () => {
     const state = urlParams.get('state');
 
     if (!code || !state) {
-      console.error('Missing auth parameters');
-      throw new Error('Missing authentication parameters');
+     console.error('Missing authentication parameters');
     }
 
     await new Promise(resolve => setTimeout(resolve, 300));
 
     if (isAuthenticated.value) {
-      router.replace('/home');
+      await router.replace('/home');
       return;
     }
-
-    try {
-      await getAccessTokenSilently();
-    } catch (err: any) {
-      console.log('Token acquisition:', err.message || err);
-    }
+    await getAccessTokenSilently();
 
     if (isAuthenticated.value) {
       console.log('Authentication successful!', user.value);
-
       if (user.value) {
         const auth0Role = (user.value as any).role || 'Domestic';
 
@@ -88,7 +81,7 @@ onMounted(async () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       console.log('Redirecting to /home...');
-      router.push('/home');
+      await router.push('/home');
     } else {
       throw new Error('Authentication timeout - please try again');
     }

@@ -183,6 +183,7 @@ const authStore = useAuthStore();
 const profileStore = ProfileStore();
 const paymentStore = usePaymentStore();
 const orderStore = useOrderStore();
+const notificationStore = useNotificationStore()
 
 const payments = ref([]);
 const orders = ref([]);
@@ -213,13 +214,10 @@ async function fetchPayments() {
 
 onMounted(async () => {
   if (authStore.user && authStore.user.email) {
-    await profileStore.getProfileByEmail(authStore.user.email);
+    await profileStore.getProfileByEmail(authStore.email);
     payments.value = await paymentStore.fetchPaymentByUserId(authStore.user.id);
     orders.value = await orderStore.getOrdersByUserId(authStore.user.id);
     allOrders.value = await orderStore.getAllOrders();
-    console.log('All orders:', allOrders.value);
-    console.log('Payments:', payments.value);
-    console.log('Orders:', orders.value);
   }
 });
 
