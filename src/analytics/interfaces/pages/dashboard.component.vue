@@ -34,22 +34,28 @@ import WidgetsContainer from '../components/widgets-container.component.vue';
 import PlantsList from '../../../monitoring/interfaces/components/plants-list.component.vue';
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import {ProfileStore} from "../../../profile/interfaces/store/profile-store.ts";
 
 const authStore = useAuthStore();
 const router = useRouter();
+const profileStore = ProfileStore();
 console.log('Dashboard component loaded with role:', authStore.role);
 const isEnterprise = authStore.role === 'Business' || authStore.role === 'Admin';
 const isDomestic = authStore.role === 'Domestic';
 
 
-// TODO: revisar el login al parecer no se actualiza o no captura el role en base al token
-// aplicamos reinicio forzado del dashboard para que se actualice el role
+ const loadProfile = async () =>{
+  await profileStore.getProfileByEmail(authStore.email);
+}
+
+
 onMounted(() => {
+  if (authStore.user && authStore.user.email) {
+    loadProfile();
+  }
   if (authStore.role === 'Specialist') {
     router.push('/consulting');
   }
-
-
   if (!localStorage.getItem('reloaded')) {
     localStorage.setItem('reloaded', 'true');
     window.location.reload();

@@ -18,6 +18,7 @@ import { useDeviceStore } from '../../../inventory/stores/device-store.ts';
 import { calculateDeviceQuantity } from '../../../public/utils/helpers/order.ts';
 import { PaymentAssembler } from '../../../payment/domain/assembler/payment-assembler.ts';
 import { usePaymentStore } from '../../../payment/interfaces/store/payment-store.ts';
+import {useAuthStore} from "@/iam/interfaces/store/auth-store.ts";
 
 const selectedDate = ref<Date | null>(null);
 const selectedSlot = ref<number>(9);
@@ -31,6 +32,7 @@ const orderStore = useOrderStore();
 const plantStore = usePlantStore();
 const deviceStore = useDeviceStore();
 const paymentStore = usePaymentStore();
+const authStore = useAuthStore();
 
 const router = useRouter();
 const isLoading = ref<boolean>(false);
@@ -183,7 +185,7 @@ async function confirmInstallation() {
       currency: 'usd',
       amount: orderRequest.details.reduce((total, detail) => total + (detail.unitPrice * detail.quantity), 0),
       paymentStatus: 'pending',
-      userId: Number(plantStore.temporalPlant.userId) || 0,
+      userId: authStore.id,
       referenceId: orderResponse.id || 0, // ID de la orden
       referenceType: 'order' // aqui se especifica que es un pago de orden
     });

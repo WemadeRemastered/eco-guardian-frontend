@@ -171,10 +171,7 @@ import PaymentsTable from '../components/payments-table.component.vue';
 import OrdersTable from '../components/orders-table.component.vue';
 import { usePaymentStore } from '../../../payment/interfaces/store/payment-store';
 import { useOrderStore } from '../../../planning/interfaces/stores/order-store';
-import { PaymentResponse } from '../../../payment/domain/assembler/payment-response';
 import OrdersList from '../components/orders-list.component.vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import { useI18n } from '../../../shared/services/usei18n';
 
 const showDropdown = ref(false);
@@ -214,7 +211,6 @@ async function fetchPayments() {
 
 onMounted(async () => {
   if (authStore.user && authStore.user.email) {
-    await profileStore.getProfileByEmail(authStore.email);
     payments.value = await paymentStore.fetchPaymentByUserId(authStore.user.id);
     orders.value = await orderStore.getOrdersByUserId(authStore.user.id);
     allOrders.value = await orderStore.getAllOrders();

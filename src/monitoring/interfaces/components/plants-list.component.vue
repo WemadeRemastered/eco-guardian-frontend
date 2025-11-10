@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import PlantCard from './plant-card.component.vue';
 import plantDialog from './plant-dialog.vue';
-import { PlantAssembler } from "../../domain/plant-assembler.ts";
-import { usePlantStore } from "../stores/plant-store.ts";
-import type { PlantResponse } from "../../domain/plant-response.ts";
-import { useAuthStore } from "../../../iam/interfaces/store/auth-store.ts";
+import {PlantAssembler} from "../../domain/plant-assembler.ts";
+import {usePlantStore} from "../stores/plant-store.ts";
+import type {PlantResponse} from "../../domain/plant-response.ts";
+import {useAuthStore} from "../../../iam/interfaces/store/auth-store.ts";
 import router from '../../../router/index.ts';
 
 const plantStore = usePlantStore();
@@ -23,8 +23,8 @@ const enterpriseValues = ref({
   waterThreshold: 0,
   lightThreshold: 0,
   temperatureThreshold: 0,
-  areaCoverage: 1, // deberia haber un campo para areaCoverage en enterprise
-  userId: authStore.user?.id || 0,
+  areaCoverage: 1,
+  userId: authStore.user?.id || '',
   isPlantation: authStore.isEnterprise,
   wellnessStateId: 1,
   image: '',
@@ -38,7 +38,7 @@ const domesticValues = ref({
   lightThreshold: 0,
   temperatureThreshold: 0,
   areaCoverage: 0,
-  userId: authStore.user?.id || 0,
+  userId: authStore.user?.id|| '',
   isPlantation: authStore.isEnterprise,
   wellnessStateId: 1,
   image: '',
@@ -46,8 +46,7 @@ const domesticValues = ref({
 });
 
 onMounted(async () => {
-  const response = await plantStore.getPlantsByUserId(authStore.user.id)
-  plants.value = response;
+  plants.value = await plantStore.getPlantsByUserId(authStore.id);
   console.log('Fetched plants:', plants.value.length);
 });
 
@@ -143,7 +142,6 @@ async function submitForm(updatedValues: any) {
     const request = PlantAssembler.toRequest(updatedValues);
     await plantStore.editPlant(updatedValues.id, request);
   } else {
-    // Para crear, pasar updatedValues directamente
     await plantStore.createPlant(updatedValues);
   }
 

@@ -13,7 +13,7 @@ export class PlantService extends HttpService {
   async getPlantById(id: number): Promise<any> {
     try {
       console.log("Fetching plant with ID:", id);
-      const response = await this.http.get(`plants/${id}`);
+      const response = await this.http.get(`/plants/${id}`);
       console.log("Plant data received:", response.data);
       return response.data;
       
@@ -25,11 +25,10 @@ export class PlantService extends HttpService {
 
   async createPlant(request: any): Promise<any> {
     try {
-      console.log("Original request:", request);
-
-      return await this.http.post("plants", request, {
+      return await this.http.post("/plants", request, {
         headers: {
           "Content-Type": "multipart/form-data",
+
         },
       });
     } catch (error: any) {
@@ -40,7 +39,7 @@ export class PlantService extends HttpService {
 
   async updatePlant(id: number, request: any): Promise<boolean> {
     try {
-      const response = await this.http.put(`plants/${id}`, request);
+      const response = await this.http.put(`/plants/${id}`, request);
       return response.status === 200;
     } catch (error) {
       console.error("Error updating plant:", error);
@@ -50,7 +49,7 @@ export class PlantService extends HttpService {
 
   async deletePlant(id: number): Promise<boolean> {
     try {
-      const response = await this.http.delete(`plants/${id}`);
+      const response = await this.http.delete(`/plants/${id}`);
       return response.status === 200;
     } catch (error) {
       return false;

@@ -67,10 +67,7 @@ export const useAuthStore = defineStore("auth", {
       this.isSpecialist = false;
       this.isAdmin = false;
 
-      localStorage.removeItem("user");
-      localStorage.removeItem("@@auth0spajs@@::KoXJKt39hQKpCInZVzyNyLhRVzD5meJh::default::openid profile email offline_access");
-      localStorage.removeItem("reloaded");
-      localStorage.removeItem("auth0_user");
+      localStorage.clear();
 
       router.push("/login");
     },

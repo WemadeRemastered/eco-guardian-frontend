@@ -21,14 +21,16 @@ export const usePlantStore = defineStore("plant", {
   },
 
   actions: {
-    // retorna un objeto con mensaje y id de la planta creada
     async createPlant(plantRequest: any): Promise<any> {
       try {
-        // Pasar el request directamente - el servicio maneja el mapeo
-        const response = await plantService.createPlant(plantRequest);
-        console.log("Plant created successfully:", response);
+        const request = new FormData();
+        for (const key in plantRequest) {
+          if (key !== "id") {
+            request.append(key, plantRequest[key]);
+          }
+        }
+        const response = await plantService.createPlant(request);
         await this.getPlantsByUserId(plantRequest.userId);
-
         return response.data;
       } catch (error) {
         console.error("Error in createPlant store:", error);
