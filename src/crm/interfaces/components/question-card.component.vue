@@ -67,10 +67,24 @@
           <div class="specialist-header mb-4">
             <h4 class="specialist-title">The question is currently: {{ question.status.toUpperCase() }}</h4>
           </div>
-          <div v-if="questionAnswer" class="answer-content"><h2>{{ questionAnswer.answerText }}</h2>
-          <p v-if="questionAnswer.createdAt">Created at: {{ questionAnswer.createdAt }}</p>
-        </div>
-          
+
+          <!-- Loading state for answer -->
+          <div v-if="answerLoading" class="answer-content">
+            <i class="pi pi-spin pi-spinner"></i>
+            <span class="ml-2">Loading response...</span>
+          </div>
+
+          <!-- Show answer when available -->
+          <div v-else-if="questionAnswer" class="answer-content">
+            <h2 class="answer-text">{{ questionAnswer.answerText }}</h2>
+            <p v-if="questionAnswer.createdAt">Created at: {{ questionAnswer.createdAt }}</p>
+          </div>
+
+          <!-- No answer yet -->
+          <div v-else class="answer-content">
+            <h2>No answer yet</h2>
+            <p class="text-sm text-gray-600">This question has not been answered by a specialist yet.</p>
+          </div>
 
         </div>
       </div>
@@ -91,17 +105,17 @@ let visible = ref(false);
 //let expertResponse = ref('');
 const authStore = useAuthStore();
 
+// Local representation of the backend answer mapped to friendly names
 interface QuestionResponse {
+  id: number;
+  questionId: number;
   specialistId: number;
   answerText: string;
   createdAt: string;
 }
 
-let questionAnswer: Ref<QuestionResponse> = ref<QuestionResponse>({
-  specialistId: 0,
-  answerText: '',
-  createdAt: ''
-});
+let questionAnswer: Ref<QuestionResponse | null> = ref<QuestionResponse | null>(null);
+const answerLoading = ref(false);
 
 const emit = defineEmits<{
   click: [question: Question];
@@ -131,28 +145,51 @@ const handleImageError = (event: Event) => {
 // Transform the question prop to a display model using the assembler service
 const displayQuestion = QuestionAssemblerService.toDisplayModel(props.question);
 
-const getQuestionAnswer = (questionId: number): QuestionResponse => {
+// Async function to fetch the answer and map fields returned by backend
+const getQuestionAnswer = async (questionId: number): Promise<void> => {
   const consultingService = new CrmService();
+  answerLoading.value = true;
+  questionAnswer.value = null;
 
-  // Default response to return immediately
-  const defaultResponse: QuestionResponse = {
-    specialistId: 0,
-    answerText: 'No answer available at the moment.',
-    createdAt: ''
-  };
+  try {
+    const response: any = await consultingService.getAnswersByQuestionId(questionId);
+    console.log(response);
+    let payload: any = response;
 
-  consultingService.getAnswersByQuestionId(questionId)
-    .then((response) => {
-      // You may want to update a ref or emit an event here instead of returning
-      questionAnswer.value = response;
-      questionAnswer.value.createdAt = new Date(response.createdAt).toLocaleString();
-    })
-    .catch((error) => {
-      console.error('Error fetching question answer:', error);
-      questionAnswer.value = defaultResponse;
-    });
+   while (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'data')) {
+      payload = payload.data;
+    }
 
-  return defaultResponse;
+    let data: any = null;
+    if (Array.isArray(payload)) {
+      data = payload.length > 0 ? payload[0] : null;
+    } else {
+      data = payload || null;
+    }
+    
+    if (!data) {
+      questionAnswer.value = null;
+      return;
+    }
+    console.log(data?.answerText ?? data?.answer_text ?? data?.answer);
+
+    const mapped: QuestionResponse = {
+      id: Number(data.id || data.answer_id || 0),
+      questionId: Number(data.question_id || data.questionId || data.question || 0),
+      specialistId: Number(data.specialist_id || data.specialistId || 0),
+      answerText: String(data.answerText || data.answer_text || data.answer || ''),
+      createdAt: data.created_at ? new Date(data.created_at).toLocaleString() : (data.createdAt ? new Date(data.createdAt).toLocaleString() : '')
+    };
+
+    questionAnswer.value = mapped;
+
+    console.log('[getQuestionAnswer] mapped questionAnswer:', questionAnswer.value);
+  } catch (error) {
+    console.error('Error fetching question answer:', error);
+    questionAnswer.value = null;
+  } finally {
+    answerLoading.value = false;
+  }
 };
 
 const handleClick = () => {  
@@ -161,10 +198,7 @@ const handleClick = () => {
     return props.question;
   }
   visible.value = true;
-  if (props.question.status !== 'PENDING') {
-    getQuestionAnswer(props.question.id);
-  }
-
+  void getQuestionAnswer(props.question.id);
 };
 
 
@@ -324,7 +358,7 @@ const formatStatus = (status: string): string => {
 }
 
 .thumbnail-image:hover {
-  border-color: var(--primary-color, #059669);
+  border-color: #059669;
 }
 
 .preview-image {
@@ -388,7 +422,7 @@ const formatStatus = (status: string): string => {
 .specialist-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--primary-color, #059669);
+  color: #059669;
   margin: 0;
 }
 

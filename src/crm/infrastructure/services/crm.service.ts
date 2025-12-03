@@ -1,4 +1,3 @@
-
 import { HttpService } from "../../../shared/services/http-common";
 import { QuestionAssemblerService, type CreateQuestionFormRequest } from "./question-assembler.service";
 
@@ -63,15 +62,34 @@ export class CrmService extends HttpService {
   }
   //Gets one specific question by its ID
   public async getAnswersByQuestionId(questionId: number): Promise<any> {
-   try {
-    const answer = await this.http.get(`questions/${questionId}/answers`);
-    console.log("Response from getAnswersByQuestionId:", answer.data);
+    try {
+      const response = await this.http.get(`questions/${questionId}/answers`);
+      console.log("Response from getAnswersByQuestionId (raw data):", response.data);
 
-    return answer.data[0];
-   }
-    catch (error) {
-        console.error("Error fetching answers by question ID:", error);//Probably that there is no answer yet
+      // Return a structured result so callers always receive a predictable shape
+      return {
+        success: true,
+        status: response.status,
+        data: response.data ?? null
+      };
+    } catch (error: any) {
+      console.error("Error fetching answers by question ID:", error);
+      if (error.response) {
+        console.error("Response error:", error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error("Request error:", error.request);
+      } else {
+        console.error("Unknown error:", error.message);
       }
+
+      return {
+        success: false,
+        status: error.response?.status || 0,
+        error: true,
+        data: null,
+        details: error.response?.data || error.message
+      };
+    }
   };
 
 //Posts an answer to a specific question by its ID

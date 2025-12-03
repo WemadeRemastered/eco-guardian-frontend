@@ -41,6 +41,7 @@ const getInitialUserData = () => {
 
 const initialData = getInitialUserData();
 
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: initialData.user,

@@ -177,7 +177,7 @@ const submitQuestion = async () => {
       title: questionTitle.value.trim(),
       content: questionContent.value.trim(),
       plantId: parseInt(selectedPlantId.value),
-      userId: parseInt(authStore.id),
+      userId: authStore.id,
       images: questionImages.value.length > 0 ? questionImages.value : undefined,
     };
     
