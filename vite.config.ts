@@ -5,7 +5,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/eco-guardian-frontend/",
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
